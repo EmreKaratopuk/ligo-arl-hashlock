@@ -1,0 +1,28 @@
+/*
+This contract is used for creating hashes which can be used with the entry points of the contract hashlock_contract.arl
+
+first parameter: bytes representation of the solution
+second parameter (optional): wallet address of user for creating commit hash
+
+first output: hash representation of given solution
+second output: commit hash
+
+example command to dry run this script: ligo run dry-run get_bytes.jsligo '[0x16, Some("tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6")]' '[0x, 0x]'
+*/
+
+type return_ = [list <operation>, [bytes, bytes]];
+type parameter = [bytes, option<address>];
+const main = (p: parameter, _s: [bytes, bytes]): return_ => {
+    let solution_hash:bytes = Crypto.sha256(p[0]);
+    match(p[1], {
+        Some: (public_addr) => {
+            let address_bytes = Bytes.pack(public_addr);
+            let commit: bytes = Bytes.concat(p[0], address_bytes);
+            let commit_hash: bytes = Crypto.sha256(commit);
+            return [list([]), [solution_hash, commit_hash]];
+        },
+        None: () => { 
+            return [list([]), [solution_hash, 0x]];
+        }
+    });
+}

@@ -1,0 +1,53 @@
+archetype demo2
+
+variable unused: bool = true
+constant hashed: bytes = 0x58f7b0780592032e4d8602a3e8690fb2c701b2e1dd546e703445aabd6469734d
+
+asset commits identified by addr to big_map{
+    addr: address;
+    commit: date * bytes;  // commit: tuple(date, bytes)
+}
+
+enum parameter =
+| Commit<bytes>
+| Reveal<bytes * option<lambda<unit, option<list<operation>>>>>
+
+entry commit_message(p: bytes) {
+    effect {
+        var user_commit = (now + 10s, p); // changed 1 day to 10s for testing purposes
+        if commits.contains(caller) then
+            commits.update(caller, {commit=user_commit})
+        else
+            commits.add({addr=caller; commit=user_commit})
+    }
+}
+
+entry reveal(p_hashable: bytes, p_message: option<lambda<unit, option<list<operation>>>>){
+    require {
+        r1: unused otherwise "This contract has already been used.";
+        r2: commits.contains(caller) otherwise "You have not made a commitment to hash against yet.";
+    }
+    effect {
+        var user_commit = commits[caller].commit;
+        if now < user_commit[0] then fail("It has not been 24 hours since your commit yet.");
+        var user_hash: bytes = concat(p_hashable, pack(caller));
+        var salted: bytes = sha256(user_hash);
+        if salted <> user_commit[1] then fail("This reveal does not match your commitment.");
+        if hashed <> sha256(p_hashable) then fail("Your commitment did not match the storage hash.");
+        unused := false;
+        
+        if is_some(p_message) then begin
+            var func: lambda<unit, option<list<operation>>> ?= p_message;
+            var run: option<list<operation>> = exec_lambda(func, Unit)
+        end
+    }
+}
+
+entry main(p: parameter) {
+    effect{
+        match p with
+        | Commit(p_bytes) -> transfer 0tz to entry self.commit_message(p_bytes)
+        | Reveal(p_hashable, p_message) -> transfer 0tz to entry self.reveal(p_hashable, p_message)
+        end
+    }
+}
