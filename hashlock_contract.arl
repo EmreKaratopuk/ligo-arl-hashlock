@@ -4,6 +4,8 @@ variable unused: bool = true
 constant hashed: bytes = 0x58f7b0780592032e4d8602a3e8690fb2c701b2e1dd546e703445aabd6469734d
 // hashed is the hash of the solution
 
+// Assets resemble mysql tables, in this variable addr and commit are columns
+// and rows will be added as users update this variable
 asset commits identified by addr to big_map{
     addr: address;
     commit: date * bytes;  // commit: tuple(date, bytes)
@@ -35,7 +37,7 @@ entry reveal(p_hashable: bytes, p_message: option<lambda<unit, option<list<opera
         var salted: bytes = sha256(plaintext_user_commit);
         if salted <> user_commit[1] then fail("This reveal does not match your commitment.");
         if hashed <> sha256(p_hashable) then fail("Your commitment did not match the storage hash.");
-        unused := false;
+        unused := false; // := denotes assign
         
         // begin and end are used when there are multiple instructions
         if is_some(p_message) then begin

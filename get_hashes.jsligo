@@ -1,18 +1,19 @@
 /*
-This contract is used for creating hashes which can be used with the entry points of the contract hashlock_contract.arl
+This contract is used for creating hashes which can be used for the entry points of the contract hashlock_contract.arl
 
 first parameter: bytes representation of the solution
-second parameter (optional): wallet address of user for creating commit hash
+second parameter (optional): wallet address of source for creating commit hash
 
 first output: hash representation of given solution
 second output: commit hash
 
-example command to dry run this script: ligo run dry-run get_bytes.jsligo '[0x16, Some("tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6")]' '[0x, 0x]'
+sample command to dry run this script: ligo run dry-run get_hashes.jsligo '[0x16, Some("tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6")]' '[0x, 0x]'
 */
 
-type return_ = [list <operation>, [bytes, bytes]];
+type storage = [bytes, bytes];
+type return_ = [list <operation>, storage];
 type parameter = [bytes, option<address>];
-const main = (p: parameter, _s: [bytes, bytes]): return_ => {
+const main = (p: parameter, _s: storage): return_ => {
     let solution_hash:bytes = Crypto.sha256(p[0]);
     match(p[1], {
         Some: (public_addr) => {
