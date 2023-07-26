@@ -1,20 +1,20 @@
 # Archetype HashLock Contract
 
-The repository contains the source code of a hashlock smart contract written with Archetype language and a jsligo file for creating hashes that can be used as parameters for entry points.
+The repository contains the source code of a hashlock smart contract written in Archetype language and a jsligo file for creating hashes that can be used as parameters for entry points.
 
-**NB:** source refers to the address of the account that originates the call
+**NB:** source refers to the account that originates the call
 
 ## HashLock Smart Contract
 
-The storage of the smart contract contains two variables, `unused` (bool) and `commits` (big map). `unused` variable is used for checking either the contract has been used or the solution has been committed. The other variable, `commits`, is used for storing commits associated with their submitters. The variable `hashed` is not stored in the storage since it is a constant variable and is hardcoded in the compiled michelson code of the smart contract.
+The smart contract storage contains two variables, `unused` (bool) and `commits` (big map). `unused` variable is used for checking whether the contract has been used or the solution has been committed. The other variable, `commits`, is used for storing commits associated with their submitters. The variable `hashed` is not stored in the storage since it is a constant variable and is hardcoded in the compiled michelson code of the smart contract.
 
 `commit_hash` entry point is used by sources to submit their salted hashes to the smart contract. The salted hash must be created by using the concatenation of the source's public address (wallet address) and user's solution with sha256 algorithm.
 
-`reveal` entry point is used for checking whether the source's solution matches with the solution harcoded in the contract. If the contract has been used before (unused variable is false), then the contract will fail. The contract will also check the source's salted hash by using the submitted solution and source's public address. If solutions match, source's submitted lambda function is executed.
+`reveal` entry point is used for checking whether the source's solution matches the solution hardcoded in the contract. If the contract has been used before (unused variable is false), then the contract will fail. The contract will also check the source's salted hash by using the submitted solution and source's public address. If solutions match, source's submitted lambda function is executed.
 
-**NB:** In the original jsligo code, contract checks if the `reveal` entry point is executed after 24 hours of the submition the commit hash. I changed 24 hours to 10 seconds to be able to test the contract.
+**NB:** In the original jsligo code, the contract checks if the `reveal` entry point is executed after 24 hours of the submission of the commit hash. I changed 24 hours to 10 seconds to be able to test the contract.
 
-**NB** In the original code, user has to submit a lamda function to the `reveal` entry point. I changed the type of lambda function to `option` for making the testing phase easier. I also changed the return type of lambda function to `option` since list of operations are not required to be returned in Archetype.
+**NB:** In the original code, users have to submit a lambda function to the `reveal` entry point. I changed the type of lambda function to `option` for making the testing phase easier. I also changed the return type of the lambda function to `option` since list of operations is not required to be returned in Archetype.
 
 The address of the smart contract on ghostnet:
 ```
